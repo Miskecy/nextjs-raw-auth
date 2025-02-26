@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { getUserFromSession, updateUserSessionExpiration } from "./auth/core/session"
 
-// const publicRoutes = ["/auth/sign-in", "/auth/sign-up"]
+const publicRoutes = ["/auth/sign-in", "/auth/sign-up"]
 const privateRoutes = ["/private"]
 const adminRoutes = ["/admin"]
 
@@ -32,6 +32,13 @@ async function middlewareAuth(request: NextRequest) {
 			return NextResponse.redirect(new URL("/auth/sign-in", request.url))
 		}
 		if (user.role !== "ADMIN") {
+			return NextResponse.redirect(new URL("/private", request.url))
+		}
+	}
+
+	if (publicRoutes.includes(request.nextUrl.pathname)) {
+		const user = await getUserFromSession(request.cookies)
+		if (user != null) {
 			return NextResponse.redirect(new URL("/private", request.url))
 		}
 	}
